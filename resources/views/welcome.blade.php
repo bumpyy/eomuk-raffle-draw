@@ -16,7 +16,7 @@
                 </div>
                 <div class="mt-4">
                     <a class="inline-flex items-center justify-between gap-2 rounded-md border-2 border-[#6558d3] bg-white px-4 py-2 font-medium text-[#6558d3] transition-colors hover:bg-[#6558d3] hover:text-white focus:bg-[#6558d3] focus:text-white"
-                        href="{{ route('raffle.show', [WinnerPrizeEnum::MONEY->value]) }}">
+                        href="{{ route('raffle.show', [WinnerPrizeEnum::TRIP > value]) }}">
                         Go to Raffle
                     </a>
                 </div>
