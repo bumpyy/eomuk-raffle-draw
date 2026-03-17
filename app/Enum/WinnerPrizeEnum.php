@@ -14,7 +14,7 @@ enum WinnerPrizeEnum: string
     {
         return match ($this) {
             self::TRIP => 5,
-            self::MONEY => 100,
+            self::MONEY => 140,
         };
     }
 

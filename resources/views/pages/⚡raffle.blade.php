@@ -4,7 +4,8 @@ use App\Enum\WinnerPrizeEnum;
 use App\Services\RaffleService;
 use Livewire\Component;
 
-new class extends Component {
+new class extends Component
+{
     public array $winners = [];
 
     public array $animationPool = [];
@@ -36,7 +37,7 @@ new class extends Component {
             return [];
         }
 
-        $newWinners = $this->getService()->drawWinners($this->prize, $needed);
+        $newWinners    = $this->getService()->drawWinners($this->prize, $needed);
         $this->winners = array_merge($this->winners, $newWinners);
 
         $this->dispatch('winners-ready');
@@ -58,7 +59,7 @@ new class extends Component {
         }
 
         $prizeName = $this->prize->value;
-        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
+        $filename  = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
 
         return response()->streamDownload(function () {
             $file = fopen('php://output', 'w');
@@ -75,7 +76,7 @@ new class extends Component {
 };
 ?>
 
-<div class="flex min-h-screen flex-col items-center bg-gray-50 py-12 font-sans" x-cloak x-data="{
+<div class="flex min-h-screen relative flex-col items-center mt-20 py-12 font-sans" x-cloak x-data="{
     isStreaming: false,
     intervalId: null,
     displayRaffle: 'Ready to draw!',
@@ -169,14 +170,35 @@ new class extends Component {
     <div class="gsap-init-hide mb-10 text-center" x-ref="header">
     </div>
 
+    <div x-ref="displayArea" class="mb-8 relative flex h-28 w-full max-w-xl items-center justify-center rounded-2xl border-2 border-gray-200 bg-white text-4xl font-black text-gray-800 shadow-lg transition-colors" :class="displayRaffle === 'Draw complete! 🎉' ? 'border-green-400 bg-green-50 text-green-600' : ''">
+        @if(count($winners) < $prize->targetWinners())
+            <div>
+                <span class="tracking-wider" x-text="displayRaffle">Ready to draw!</span>
+            </div>
+            @else
+            <div class="text-center">
+                <span class="tracking-wider ">Congratulation to the winners!</span>
+            </div>
+            @endif
 
-    @if(!count($winners))
-    <div class="mb-8 flex h-28 w-full max-w-xl items-center justify-center rounded-2xl border-2 border-gray-200 bg-white text-4xl font-black text-gray-800 shadow-lg transition-colors"
-        x-ref="displayArea"
-        :class="displayRaffle === 'Draw complete! 🎉' ? 'border-green-400 bg-green-50 text-green-600' : ''">
-        <span class="tracking-wider" x-text="displayRaffle">Ready to draw!</span>
+
+            @switch($this->prize)
+            @case(WinnerPrizeEnum::TRIP)
+            <div class="absolute -top-[110%] right-[20%] w-[55%]">
+                <img src="{{ asset('img/plane-prize.png') }}" alt="">
+            </div>
+            @break
+
+            @case(WinnerPrizeEnum::MONEY)
+            <div class="absolute -top-[130%] right-[30%] w-[35%]">
+                <img src="{{ asset('img/money-prize.png') }}" alt="">
+            </div>
+            @break
+
+            @default
+            <span class=""></span>
+            @endswitch
     </div>
-    @endif
 
     <div class="mb-12 h-16">
         @if (count($winners) < $prize->targetWinners())
@@ -191,43 +213,43 @@ new class extends Component {
                 x-cloak x-ref="stopBtn" x-show="isStreaming" @click="stopAnimation">
                 Stop & Reveal
             </button>
-        @else
+            @else
             <div class="text-2xl font-black uppercase tracking-widest text-green-500 drop-shadow-sm">
                 All {{ $prize->targetWinners() }} Winners Selected!
             </div>
-        @endif
+            @endif
     </div>
 
     <div class="w-full max-w-7xl px-6">
 
         <div class="mb-6 flex items-end justify-between border-b-2 border-gray-200 pb-2">
             @if (count($winners) > 0)
-                <button
-                    class="flex items-center rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:scale-105 hover:bg-green-200 active:scale-95"
-                    wire:click="exportCsv">
-                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export CSV
-                </button>
+            <button
+                class="flex items-center rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:scale-105 hover:bg-green-200 active:scale-95"
+                wire:click="exportCsv">
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Export CSV
+            </button>
 
-                <button
-                    class="flex items-center rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600 transition-colors hover:scale-105 hover:bg-red-200 active:scale-95"
-                    wire:click="resetWinners"
-                    wire:confirm="Are you sure you want to delete all winners for the {{ $prize->label() }} prize? This action cannot be undone.">
-                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Reset Draw
-                </button>
+            <button
+                class="flex items-center rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600 transition-colors hover:scale-105 hover:bg-red-200 active:scale-95"
+                wire:click="resetWinners"
+                wire:confirm="Are you sure you want to delete all winners for the {{ $prize->label() }} prize? This action cannot be undone.">
+                <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Reset Draw
+            </button>
             @endif
         </div>
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             @foreach ($winners as $index => $winner)
-                <x-winner-card :winner="$winner" :index="$index" />
+            <x-winner-card :winner="$winner" :index="$index" />
             @endforeach
         </div>
     </div>

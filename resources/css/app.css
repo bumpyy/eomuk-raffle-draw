@@ -10,6 +10,10 @@
         "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
+
+    --color-cedea-red: hsl(350, 100%, 36%);
+    --color-cedea-blue: hsl(222, 66%, 34%);
+    --color-cedea-dark: hsl(356, 71%, 38%);
 }
 
 @layer base {
