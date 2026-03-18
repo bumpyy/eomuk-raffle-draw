@@ -11,7 +11,7 @@ new class extends Component
     public array $animationPool = [];
     public WinnerPrizeEnum $prize;
 
-    public string $viewMode = 'grid';
+    public string $viewMode = 'table';
 
     private function getService(): RaffleService
     {
