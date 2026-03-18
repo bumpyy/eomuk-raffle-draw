@@ -213,7 +213,7 @@ new class extends Component
                     Export CSV
                 </button>
 
-                <a href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-bold text-sm hover:bg-purple-200 transition-colors">
+                <a href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-purple-100 text-cedea-blue rounded-lg font-bold text-sm hover:bg-purple-200 transition-colors">
                     Export PDF
                 </a>
 
