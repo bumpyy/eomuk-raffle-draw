@@ -35,6 +35,14 @@ class RaffleService
             ->toArray();
     }
 
+    public function getExistingWinnersPaginated(WinnerPrizeEnum $prize)
+    {
+        return Winner::with(['submission.user'])
+            ->where('prize', $prize->value)
+            ->orderBy('id', 'asc')
+            ->paginate(10);
+    }
+
     /**
      * Get fake pool for frontend animation.
      */
@@ -42,7 +50,11 @@ class RaffleService
     {
         return Submission::query()
             ->where('status', SubmissionStatusEnum::ACCEPTED)
+
             ->whereNotNull('raffle_number')
+            ->whereHas('user', function ($query) {
+                $query->where('disqualified', false);
+            })
             ->whereNotIn('user_id', $this->getDisqualifiedUserIds())
             ->inRandomOrder()
             ->limit(500)
@@ -63,6 +75,9 @@ class RaffleService
             ->with('user')
             ->where('status', SubmissionStatusEnum::ACCEPTED)
             ->whereNotNull('raffle_number')
+            ->whereHas('user', function ($query) {
+                $query->where('disqualified', false);
+            })
             ->whereNotIn('user_id', $this->getDisqualifiedUserIds())
             ->inRandomOrder()
             ->limit($neededAmount)

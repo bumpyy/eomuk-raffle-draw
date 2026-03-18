@@ -2,11 +2,14 @@
 
 use App\Enum\WinnerPrizeEnum;
 use App\Services\RaffleService;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-new class extends Component
-{
+new class extends Component {
+    use WithPagination;
+
     public array $winners = [];
     public array $animationPool = [];
     public WinnerPrizeEnum $prize;
@@ -24,6 +27,12 @@ new class extends Component
         $this->refreshAnimationPool();
     }
 
+    #[Computed]
+    function winnersPaginated()
+    {
+        return $this->getService()->getExistingWinnersPaginated($this->prize);
+    }
+
     public function refreshAnimationPool(): void
     {
         $this->animationPool = $this->getService()->getAnimationPool();
@@ -36,10 +45,12 @@ new class extends Component
         $remaining = $target - count($this->winners);
         $toDraw = min($batch, $remaining);
 
-        if ($toDraw <= 0) return [];
+        if ($toDraw <= 0) {
+            return [];
+        }
 
         $newWinners = $this->getService()->drawWinners($this->prize, $toDraw);
-        $this->winners = array_merge($this->winners, $newWinners);
+        $this->winners = $this->getService()->getExistingWinners($this->prize);
 
         // Pass the first raffle number safely to Alpine
         $this->dispatch('winners-ready', firstRaffleNumber: $newWinners[0]['raffle_number']);
@@ -56,10 +67,12 @@ new class extends Component
 
     public function exportCsv()
     {
-        if (empty($this->winners)) return;
+        if (empty($this->winners)) {
+            return;
+        }
 
         $prizeName = $this->prize->value;
-        $filename  = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
+        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
 
         return response()->streamDownload(function () {
             $file = fopen('php://output', 'w');
@@ -75,10 +88,12 @@ new class extends Component
 
     public function exportPdf()
     {
-        if (empty($this->winners)) return;
+        if (empty($this->winners)) {
+            return;
+        }
 
         $prizeName = $this->prize->label();
-        $filename  = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
+        $filename = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
 
         return Pdf::view('pdf.winners', [
             'winners' => $this->winners,
@@ -90,134 +105,142 @@ new class extends Component
 };
 ?>
 
-<div class="flex min-h-screen relative flex-col items-center mt-20 py-12 font-sans"
-    x-cloak
-    x-data="{
-        isStreaming: false,
-        intervalId: null,
-        displayRaffle: 'Ready to draw!',
-        pool: @entangle('animationPool'),
-        viewMode: @entangle('viewMode'),
+<div class="relative mt-20 flex min-h-screen flex-col items-center py-12 font-sans" x-cloak x-data="{
+    isStreaming: false,
+    intervalId: null,
+    displayRaffle: 'Ready to draw!',
+    pool: @entangle('animationPool'),
+    viewMode: @entangle('viewMode'),
 
-        init() {
-            window.addEventListener('load', () => {
-                gsap.set(this.$refs.displayArea, { autoAlpha: 1 });
-                gsap.from(this.$refs.displayArea, { scale: 0.85, opacity: 0, duration: 0.5, ease: 'back.out(1.7)' });
-            });
-        },
+    init() {
+        window.addEventListener('load', () => {
+            gsap.set(this.$refs.displayArea, { autoAlpha: 1 });
+            gsap.from(this.$refs.displayArea, { scale: 0.85, opacity: 0, duration: 0.5, ease: 'back.out(1.7)' });
+        });
+    },
 
-        startAnimation() {
-            if (this.pool.length === 0) return;
-            this.isStreaming = true;
-            this.displayRaffle = 'Shuffling...';
+    startAnimation() {
+        if (this.pool.length === 0) return;
+        this.isStreaming = true;
+        this.displayRaffle = 'Shuffling...';
 
-            gsap.to(this.$refs.displayArea, {
-                scale: 1.02,
-                boxShadow: '0px 0px 20px rgba(59, 130, 246, 0.7)',
-                repeat: -1, yoyo: true, duration: 0.15, ease: 'sine.inOut'
-            });
+        gsap.to(this.$refs.displayArea, {
+            scale: 1.02,
+            boxShadow: '0px 0px 20px rgba(59, 130, 246, 0.7)',
+            repeat: -1,
+            yoyo: true,
+            duration: 0.15,
+            ease: 'sine.inOut'
+        });
 
-            this.intervalId = setInterval(() => {
-                let randomIndex = Math.floor(Math.random() * this.pool.length);
-                this.displayRaffle = this.pool[randomIndex];
-            }, 40);
-        },
+        this.intervalId = setInterval(() => {
+            let randomIndex = Math.floor(Math.random() * this.pool.length);
+            this.displayRaffle = this.pool[randomIndex];
+        }, 40);
+    },
 
-        async stopAnimation() {
-            gsap.killTweensOf(this.$refs.displayArea);
-            gsap.to(this.$refs.displayArea, { scale: 1, boxShadow: 'none', borderColor: '#e5e7eb', duration: 0.15 });
+    async stopAnimation() {
+        gsap.killTweensOf(this.$refs.displayArea);
+        gsap.to(this.$refs.displayArea, { scale: 1, boxShadow: 'none', borderColor: '#e5e7eb', duration: 0.15 });
 
-            this.displayRaffle = 'Picking...';
+        this.displayRaffle = 'Picking...';
 
-            // Use an arrow function so 'this' remains bound to Alpine
-            const handleResult = (event) => {
-                clearInterval(this.intervalId);
-                this.isStreaming = false;
+        const handleResult = (event) => {
+            clearInterval(this.intervalId);
+            this.isStreaming = false;
 
-                // Livewire 3 safely injects the named argument here. We fall back safely just in case.
-                const winNum = event.detail.firstRaffleNumber || (event.detail[0] && event.detail[0].firstRaffleNumber);
 
-                // Lock the main display to the first winner's number
-                this.displayRaffle = winNum || 'Done!';
+            const winNum = event.detail.firstRaffleNumber || (event.detail[0] && event.detail[0].firstRaffleNumber);
 
-                if (window.confetti) {
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                }
+            this.displayRaffle = winNum || 'Done!';
 
-                window.removeEventListener('winners-ready', handleResult);
-
-                // Trigger the stagger reveal
-                this.$nextTick(() => this.playStagger());
-            };
-
-            // Attach listener BEFORE firing the Livewire request to prevent race conditions
-            window.addEventListener('winners-ready', handleResult);
-
-            await $wire.pickWinners();
-        },
-
-        playStagger() {
-            let items = document.querySelectorAll('.winner-item:not(.gsap-animated)');
-
-            if (items.length > 0) {
-                gsap.set(items, { opacity: 0, y: 20, scale: 0.95 });
-
-                gsap.to(items, {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.4,
-                    ease: 'back.out(1.7)',
-                    stagger: 0.08,
-                    onComplete: () => {
-                        items.forEach(i => i.classList.add('gsap-animated'));
-                    }
-                });
+            if (window.confetti) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             }
-        }
-    }">
 
-    <div wire:ignore x-ref="displayArea" class="gsap-init-hide mb-8 relative flex h-28 w-full max-w-xl items-center justify-center rounded-2xl border-2 border-gray-200 bg-white text-4xl font-black text-gray-800 shadow-lg">
+            window.removeEventListener('winners-ready', handleResult);
+
+            // // Trigger the stagger reveal
+            // this.$nextTick(() => this.playStagger());
+        };
+
+
+        window.addEventListener('winners-ready', handleResult);
+
+        await $wire.pickWinners();
+    },
+
+    playStagger() {
+        let items = document.querySelectorAll('.winner-item:not(.gsap-animated)');
+
+        if (items.length > 0) {
+            gsap.set(items, { opacity: 0, y: 20, scale: 0.95 });
+
+            gsap.to(items, {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.4,
+                ease: 'back.out(1.7)',
+                stagger: 0.08,
+                onComplete: () => {
+                    items.forEach(i => i.classList.add('gsap-animated'));
+                }
+            });
+        }
+    }
+}">
+
+    <div class="gsap-init-hide relative mb-8 flex h-28 w-full max-w-xl items-center justify-center rounded-2xl border-2 border-gray-200 bg-white text-4xl font-black text-gray-800 shadow-lg"
+        wire:ignore x-ref="displayArea">
 
         <div class="flex flex-col items-center">
-            <span class="tracking-wider font-mono text-blue-600" x-text="displayRaffle">Ready to draw!</span>
+            <span class="font-mono tracking-wider text-blue-600" x-text="displayRaffle">Ready to draw!</span>
         </div>
 
     </div>
 
-    <div class="mb-12 h-16 flex flex-col items-center">
+    <div class="mb-12 flex h-16 flex-col items-center">
         @if (count($winners) < $prize->targetWinners())
-            <button class="rounded-xl bg-blue-600 px-10 py-4 text-lg font-bold text-white shadow-md transition-all hover:-translate-y-1"
+            <button
+                class="rounded-xl bg-blue-600 px-10 py-4 text-lg font-bold text-white shadow-md transition-all hover:-translate-y-1"
                 x-show="!isStreaming" @click="startAnimation">
                 Draw {{ $prize->batchSize() }} Raffle
             </button>
-            <button x-cloak class="rounded-xl bg-red-600 px-10 py-4 text-lg font-bold text-white shadow-md hover:-translate-y-1"
-                x-show="isStreaming" @click="stopAnimation">
+            <button class="rounded-xl bg-red-600 px-10 py-4 text-lg font-bold text-white shadow-md hover:-translate-y-1"
+                x-cloak x-show="isStreaming" @click="stopAnimation">
                 Stop & Reveal
             </button>
             @else
-            <div class="text-2xl font-black text-green-500 uppercase drop-shadow-sm">Draw Finished!</div>
+            <div class="text-2xl font-black uppercase text-green-500 drop-shadow-sm">Draw Finished!</div>
             @endif
     </div>
 
     <div class="w-full max-w-7xl px-6">
         <div class="mb-6 flex items-center justify-between border-b-2 border-gray-200 pb-4">
-            <div class="flex items-center space-x-2 bg-gray-200 p-1 rounded-lg">
-                <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="px-3 py-1 rounded-md text-sm font-bold transition-all">Grid</button>
-                <button @click="viewMode = 'table'" :class="viewMode === 'table' ? 'bg-white shadow text-blue-600' : 'text-gray-500'" class="px-3 py-1 rounded-md text-sm font-bold transition-all">Table</button>
+            <div class="flex items-center space-x-2 rounded-lg bg-gray-200 p-1">
+                <button class="rounded-md px-3 py-1 text-sm font-bold transition-all" @click="viewMode = 'grid'"
+                    :class="viewMode === 'grid' ? 'bg-white shadow text-blue-600' : 'text-gray-500'">Grid</button>
+                <button class="rounded-md px-3 py-1 text-sm font-bold transition-all" @click="viewMode = 'table'"
+                    :class="viewMode === 'table' ? 'bg-white shadow text-blue-600' : 'text-gray-500'">Table</button>
             </div>
 
             <div class="flex space-x-3">
-                @if(count($winners) > 0)
-                <button wire:click="exportCsv" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-bold text-sm hover:bg-green-200 transition-colors">
+                @if (count($winners) > 0)
+                <button
+                    class="rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200"
+                    wire:click="exportCsv">
                     Export CSV
                 </button>
 
-                <a href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-cedea-blue text-white rounded-lg font-bold text-sm  transition-colors">
+                <a class="bg-cedea-blue inline-flex items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
+                    href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank">
                     Export PDF
                 </a>
 
-                <button wire:click="resetWinners" wire:confirm="Reset all?" class="px-4 py-2 bg-red-100 text-red-600 rounded-lg font-bold text-sm hover:bg-red-200 transition-colors">
+                <button
+                    class="rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600 transition-colors hover:bg-red-200"
+                    wire:click="resetWinners" wire:confirm="Reset all?">
                     Reset
                 </button>
                 @endif
@@ -225,36 +248,17 @@ new class extends Component
         </div>
 
         <div x-show="viewMode === 'grid'" x-transition>
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                @foreach ($winners as $index => $winner)
-                <div wire:key="grid-{{ $winner['raffle_number'] }}" class="winner-item winner-card">
-                    <x-winner-card :winner="$winner" :index="$index" />
-                </div>
-                @endforeach
-            </div>
+            @include('table-view')
         </div>
 
-        <div x-show="viewMode === 'table'" x-transition x-cloak class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 text-gray-600 uppercase text-xs font-bold">
-                    <tr>
-                        <th class="px-6 py-4">No</th>
-                        <th class="px-6 py-4">Raffle Number</th>
-                        <th class="px-6 py-4">Name</th>
-                        <th class="px-6 py-4">Contact</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @foreach ($winners as $index => $winner)
-                    <tr wire:key="table-{{ $winner['raffle_number'] }}" class="winner-item hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-blue-600">#{{ $index + 1 }}</td>
-                        <td class="px-6 py-4 font-mono font-black">{{ $winner['raffle_number'] }}</td>
-                        <td class="px-6 py-4 font-semibold">{{ $winner['name'] }}</td>
-                        <td class="px-6 py-4 text-gray-500 text-sm">{{ $winner['email'] }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+            x-show="viewMode === 'table'" x-transition x-cloak>
+            @include('grid-view')
         </div>
+
+        <div class="mt-4">
+            {{ $this->winnersPaginated->links() }}
+        </div>
+
     </div>
 </div>
