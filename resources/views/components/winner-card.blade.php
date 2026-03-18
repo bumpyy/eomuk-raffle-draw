@@ -1,8 +1,7 @@
 @props(['winner', 'index'])
 
-<div class="winner-card flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-    wire:key="winner-{{ $winner['raffle_number'] }}">
-
+<div
+    class="flex h-full flex-col justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
     <div class="mb-4 flex items-center justify-between">
         <span class="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
             {{ $index + 1 }}

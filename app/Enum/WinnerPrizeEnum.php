@@ -19,6 +19,17 @@ enum WinnerPrizeEnum: string
     }
 
     /**
+     * Define the batch of winners for draw
+     */
+    public function batchSize(): int
+    {
+        return match ($this) {
+            self::TRIP => 1,
+            self::MONEY => 10,
+        };
+    }
+
+    /**
      * Clean display names for the UI
      */
     public function label(): string
