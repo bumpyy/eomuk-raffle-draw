@@ -1,17 +1,17 @@
 <?php
 
-use App\Enum\WinnerPrizeEnum;
-use App\Services\RaffleService;
-use Livewire\Attributes\Computed;
-use Livewire\Component;
-use Livewire\WithPagination;
-use Spatie\LaravelPdf\Facades\Pdf;
-use Spatie\SimpleExcel\SimpleExcelWriter;
+    use App\Enum\WinnerPrizeEnum;
+    use App\Services\RaffleService;
+    use Livewire\Attributes\Computed;
+    use Livewire\Component;
+    use Livewire\WithPagination;
+    use Spatie\LaravelPdf\Facades\Pdf;
 
-new class extends Component {
+    new class extends Component
+    {
     use WithPagination;
 
-    public array $winners = [];
+    public array $winners       = [];
     public array $animationPool = [];
     public WinnerPrizeEnum $prize;
 
@@ -29,12 +29,12 @@ new class extends Component {
         $this->winners = $this->getService()->getExistingWinners($this->prize);
         $this->refreshAnimationPool();
 
-        $this->scrambleInList = env('RAFFLE_SCRAMBLE_IN_LIST', true);
+        $this->scrambleInList  = env('RAFFLE_SCRAMBLE_IN_LIST', true);
         $this->hideTopScramble = env('RAFFLE_HIDE_TOP_SCRAMBLE', false);
     }
 
     #[Computed]
-    function winnersPaginated()
+    public function winnersPaginated()
     {
         return $this->getService()->getExistingWinnersPaginated($this->prize);
     }
@@ -46,16 +46,16 @@ new class extends Component {
 
     public function pickWinners(): array
     {
-        $target = $this->prize->targetWinners();
-        $batch = $this->prize->batchSize();
+        $target    = $this->prize->targetWinners();
+        $batch     = $this->prize->batchSize();
         $remaining = $target - count($this->winners);
-        $toDraw = min($batch, $remaining);
+        $toDraw    = min($batch, $remaining);
 
         if ($toDraw <= 0) {
             return [];
         }
 
-        $newWinners = $this->getService()->drawWinners($this->prize, $toDraw);
+        $newWinners    = $this->getService()->drawWinners($this->prize, $toDraw);
         $this->winners = $this->getService()->getExistingWinners($this->prize);
 
         $this->gotoPage($this->winnersPaginated()->lastPage());
@@ -73,14 +73,14 @@ new class extends Component {
         $this->refreshAnimationPool();
     }
 
- public function exportCsv()
+    public function exportCsv()
     {
         if (empty($this->winners)) {
             return;
         }
 
         $prizeName = $this->prize->value;
-        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
+        $filename  = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
 
         return response()->streamDownload(function () {
             $file = fopen('php://output', 'w');
@@ -101,43 +101,44 @@ new class extends Component {
         }
 
         $prizeName = $this->prize->label();
-        $filename = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
+        $filename  = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
 
         return Pdf::view('pdf.winners', [
-            'winners' => $this->winners,
+            'winners'   => $this->winners,
             'prizeName' => $prizeName,
         ])
             ->format('a4')
             ->download($filename);
     }
 
-public function exportExcel()
+    public function exportExcel()
     {
         if (empty($this->winners)) {
             return;
         }
 
         $prizeName = $this->prize->value;
-        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.xlsx';
+        $filename  = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.xlsx';
 
-        // 1. Initialize the Spatie stream download
-        $writer = SimpleExcelWriter::streamDownload($filename);
+        // Wrap Spatie inside Livewire's trusted streamDownload response
+        return response()->streamDownload(function () {
 
-        // 2. Add each winner as a row
-        foreach ($this->winners as $index => $winner) {
-            $writer->addRow([
-                'No' => $index + 1,
-                'Raffle Number' => $winner['raffle_number'],
-                'Name' => $winner['name'],
-                'Email' => $winner['email'],
-                'Phone' => $winner['phone'],
-            ]);
-        }
+            // Create the Spatie writer and point it directly to the output buffer
+            $writer = \Spatie\SimpleExcel\SimpleExcelWriter::create('php://output', 'xlsx');
 
-        // 3. Send it directly to the browser
-        return $writer->toBrowser();
+            foreach ($this->winners as $index => $winner) {
+                $writer->addRow([
+                    'No'            => $index + 1,
+                    'Raffle Number' => $winner['raffle_number'],
+                    'Name'          => $winner['name'],
+                    'Email'         => $winner['email'],
+                    'Phone'         => $winner['phone'],
+                ]);
+            }
+
+        }, $filename);
     }
-};
+    };
 ?>
 
 <div class="relative mt-20 flex min-h-screen flex-col items-center py-12 font-sans" x-cloak x-data="{
