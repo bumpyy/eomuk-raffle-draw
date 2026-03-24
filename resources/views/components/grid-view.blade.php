@@ -1,22 +1,7 @@
-<table class="w-full border-collapse text-left">
-    <thead class="bg-gray-50 text-xs font-bold uppercase text-gray-600">
-        <tr>
-            <th class="px-6 py-4">No</th>
-            <th class="px-6 py-4">Raffle Number</th>
-            <th class="px-6 py-4">Name</th>
-            <th class="px-6 py-4">Contact</th>
-        </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-        @foreach ($this->winnersPaginated as $index => $winner)
-            <tr class="winner-item transition-colors hover:bg-gray-50" wire:key="table-{{ $winner['raffle_number'] }}">
-                <td class="px-6 py-4 font-bold text-blue-600">
-                    #{{ ($this->winnersPaginated->currentpage() - 1) * $this->winnersPaginated->perpage() + $loop->index + 1 }}
-                </td>
-                <td class="px-6 py-4 font-mono font-black">{{ $winner->submission->raffle_number }}</td>
-                <td class="px-6 py-4 font-semibold">{{ $winner->submission->user->name }}</td>
-                <td class="px-6 py-4 text-sm text-gray-500">{{ $winner->submission->user->email }}</td>
-            </tr>
-        @endforeach
-    </tbody>
-</table>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                @foreach ($this->winnersPaginated as $index => $winner)
+                    <div class="winner-item winner-card" wire:key="grid-{{ $winner->submission->raffle_number }}">
+                        <x-winner-card :winner="$winner" :index="$index" />
+                    </div>
+                @endforeach
+            </div>

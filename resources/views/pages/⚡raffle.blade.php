@@ -248,12 +248,12 @@ new class extends Component {
         </div>
 
         <div x-show="viewMode === 'grid'" x-transition>
-            @include('table-view')
+            @include('grid-view')
         </div>
 
         <div class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
             x-show="viewMode === 'table'" x-transition x-cloak>
-            @include('grid-view')
+            @include('table-view')
         </div>
 
         <div class="mt-4">

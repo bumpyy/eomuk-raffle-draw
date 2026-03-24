@@ -6,11 +6,11 @@ class RaffleController extends Controller
 {
     public function korea()
     {
-        return view('raffle.korea');
+        // return view('raffle.korea');
     }
 
     public function money()
     {
-        return view('raffle.money');
+        // return view('raffle.money');
     }
 }
