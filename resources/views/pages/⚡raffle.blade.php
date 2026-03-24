@@ -6,6 +6,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\LaravelPdf\Facades\Pdf;
+use Spatie\SimpleExcel\SimpleExcelWriter;
 
 new class extends Component {
     use WithPagination;
@@ -28,8 +29,8 @@ new class extends Component {
         $this->winners = $this->getService()->getExistingWinners($this->prize);
         $this->refreshAnimationPool();
 
-        $this->scrambleInList =  env('RAFFLE_SCRAMBLE_IN_LIST', true);
-        $this->hideTopScramble =  env('RAFFLE_HIDE_TOP_SCRAMBLE', false);
+        $this->scrambleInList = env('RAFFLE_SCRAMBLE_IN_LIST', true);
+        $this->hideTopScramble = env('RAFFLE_HIDE_TOP_SCRAMBLE', false);
     }
 
     #[Computed]
@@ -72,8 +73,70 @@ new class extends Component {
         $this->refreshAnimationPool();
     }
 
-    public function exportCsv() { /* existing logic */ }
-    public function exportPdf() { /* existing logic */ }
+ public function exportCsv()
+    {
+        if (empty($this->winners)) {
+            return;
+        }
+
+        $prizeName = $this->prize->value;
+        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['No', 'Raffle Number', 'Name', 'Email', 'Phone']);
+
+            foreach ($this->winners as $index => $winner) {
+                fputcsv($file, [$index + 1, $winner['raffle_number'], $winner['name'], $winner['email'], $winner['phone']]);
+            }
+
+            fclose($file);
+        }, $filename);
+    }
+
+    public function exportPdf()
+    {
+        if (empty($this->winners)) {
+            return;
+        }
+
+        $prizeName = $this->prize->label();
+        $filename = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
+
+        return Pdf::view('pdf.winners', [
+            'winners' => $this->winners,
+            'prizeName' => $prizeName,
+        ])
+            ->format('a4')
+            ->download($filename);
+    }
+
+public function exportExcel()
+    {
+        if (empty($this->winners)) {
+            return;
+        }
+
+        $prizeName = $this->prize->value;
+        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.xlsx';
+
+        // 1. Initialize the Spatie stream download
+        $writer = SimpleExcelWriter::streamDownload($filename);
+
+        // 2. Add each winner as a row
+        foreach ($this->winners as $index => $winner) {
+            $writer->addRow([
+                'No' => $index + 1,
+                'Raffle Number' => $winner['raffle_number'],
+                'Name' => $winner['name'],
+                'Email' => $winner['email'],
+                'Phone' => $winner['phone'],
+            ]);
+        }
+
+        // 3. Send it directly to the browser
+        return $writer->toBrowser();
+    }
 };
 ?>
 
@@ -215,6 +278,11 @@ new class extends Component {
                 <button class="rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200" wire:click="exportCsv">
                     Export CSV
                 </button>
+
+                <button class="rounded-lg bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-200" wire:click="exportExcel">
+            Export Excel
+        </button>
+
                 <a class="bg-cedea-blue inline-flex items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
                     href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank">
                     Export PDF

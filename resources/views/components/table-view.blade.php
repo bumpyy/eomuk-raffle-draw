@@ -8,10 +8,9 @@
         </tr>
     </thead>
     <tbody class="divide-y divide-gray-100 text-black">
-
         @foreach ($this->winnersPaginated as $index => $winner)
             <tr class="winner-item transition-colors hover:bg-gray-50"
-                data-raffle="{{ $winner->submission->raffle_number }}"
+                data-raffle="{{ $winner->submission->raffle_number }}" x-show="!(isStreaming && scrambleInList)"
                 wire:key="table-{{ $winner->submission->raffle_number }}">
 
                 <td class="px-6 py-4 font-bold text-blue-600">

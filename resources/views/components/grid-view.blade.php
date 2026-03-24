@@ -2,7 +2,7 @@
 
     @foreach ($this->winnersPaginated as $index => $winner)
         <div class="winner-item" data-raffle="{{ $winner->submission->raffle_number }}"
-            wire:key="grid-{{ $winner->submission->raffle_number }}">
+            x-show="!(isStreaming && scrambleInList)" wire:key="grid-{{ $winner->submission->raffle_number }}">
 
             <x-winner-card :winner="$winner" :index="$index" />
 
