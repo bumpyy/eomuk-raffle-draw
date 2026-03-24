@@ -60,7 +60,8 @@
 
         $this->gotoPage($this->winnersPaginated()->lastPage());
 
-        $this->dispatch('winners-ready', firstRaffleNumber: $newWinners[0]['raffle_number']);
+        $lastWinner = array_slice($newWinners, -1)[0];
+        $this->dispatch('winners-ready', firstRaffleNumber: $lastWinner['raffle_number']);
 
         return $newWinners;
     }
@@ -269,26 +270,31 @@
         <div class="mb-6 flex items-center justify-between border-b-2 border-gray-200 pb-4">
             <div class="flex items-center space-x-2 rounded-lg bg-gray-200 p-1">
                 <button type="button" class="rounded-md px-3 py-1 text-sm font-bold transition-all" @click="viewMode = 'grid'"
-                    :class="viewMode === 'grid' ? 'bg-white shadow text-blue-600' : 'text-gray-500'">Grid</button>
+                    :class="viewMode === 'grid' ? 'bg-white shadow text-blue-600' : 'text-gray-500 cursor-pointer'">Grid</button>
                 <button type="button" class="rounded-md px-3 py-1 text-sm font-bold transition-all" @click="viewMode = 'table'"
-                    :class="viewMode === 'table' ? 'bg-white shadow text-blue-600' : 'text-gray-500'">Table</button>
+                    :class="viewMode === 'table' ? 'bg-white shadow text-blue-600' : 'text-gray-500 cursor-pointer'">Table</button>
             </div>
 
             <div class="flex space-x-3">
+                <a class="bg-cedea-blue inline-flex items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors" href="{{ route('welcome') }}" target="_self">
+                    Back to Main Menu
+                </a>
+
                 @if (count($winners) > 0)
-                <button class="rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200" wire:click="exportCsv">
+                <button class="cursor-pointer rounded-lg bg-green-100 px-4 py-2 text-sm font-bold text-green-700 transition-colors hover:bg-green-200" wire:click="exportCsv">
                     Export CSV
                 </button>
 
-                <button class="rounded-lg bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-200" wire:click="exportExcel">
+                <button class="rounded-lg cursor-pointer bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-200" wire:click="exportExcel">
             Export Excel
         </button>
 
-                <a class="bg-cedea-blue inline-flex items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
+                <a class="bg-cedea-blue inline-flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
                     href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank">
                     Export PDF
                 </a>
-                <button class="rounded-lg bg-red-100 px-4 py-2 text-sm font-bold text-red-600 transition-colors hover:bg-red-200" wire:click="resetWinners" wire:confirm="Reset all?">
+
+                <button class="rounded-lg bg-red-100 px-4 py-2 cursor-pointer text-sm font-bold text-red-600 transition-colors hover:bg-red-200" wire:click="resetWinners" wire:confirm="Reset all?">
                     Reset
                 </button>
                 @endif

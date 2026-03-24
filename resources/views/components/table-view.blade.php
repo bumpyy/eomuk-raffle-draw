@@ -1,4 +1,5 @@
 <table class="w-full border-collapse text-left">
+
     <thead class="bg-gray-50 text-xs font-bold uppercase text-gray-600">
         <tr>
             <th class="px-6 py-4">No</th>
@@ -10,7 +11,8 @@
     <tbody class="divide-y divide-gray-100 text-black">
         @foreach ($this->winnersPaginated as $index => $winner)
             <tr class="winner-item transition-colors hover:bg-gray-50"
-                data-raffle="{{ $winner->submission->raffle_number }}" x-show="!(isStreaming && scrambleInList)"
+                data-raffle="{{ $winner->submission->raffle_number }}"
+                x-show="!(isStreaming && !({{ count($this->winnersPaginated) }} < 10))"
                 wire:key="table-{{ $winner->submission->raffle_number }}">
 
                 <td class="px-6 py-4 font-bold text-blue-600">

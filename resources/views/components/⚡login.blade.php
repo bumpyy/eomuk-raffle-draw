@@ -35,14 +35,14 @@ new class extends Component
 
         <div class="mb-8 text-center">
             <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900">
-                System Access
+                Access
             </h1>
             <p class="mt-2 text-sm font-medium text-gray-500">
-                Please enter your credentials to continue
+                Please enter username and password to enter
             </p>
         </div>
 
-        <form wire:submit="authenticate" class="space-y-6">
+        <form wire:submit="authenticate" class="space-y-6 text-black">
 
             @if($errorMessage)
                 <div class="rounded-lg bg-red-50 p-3 text-center text-sm font-bold text-red-600">

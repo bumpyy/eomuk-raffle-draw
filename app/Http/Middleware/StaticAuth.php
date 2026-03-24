@@ -10,7 +10,6 @@ class StaticAuth
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if the specific session key exists
         if (! session()->get('is_admin_logged_in')) {
             return redirect()->route('login');
         }

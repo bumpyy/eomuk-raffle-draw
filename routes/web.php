@@ -11,7 +11,7 @@ Route::middleware([StaticAuth::class])->group(function () {
 
     Route::get('/', function () {
         return view('welcome');
-    });
+    })->name('welcome');
 
     Route::livewire('/{prize}', 'pages::raffle')
         ->whereIn('prize', array_column(WinnerPrizeEnum::cases(), 'value'))
