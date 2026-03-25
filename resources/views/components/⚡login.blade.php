@@ -34,10 +34,10 @@ new class extends Component
     <div class="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
 
         <div class="mb-8 text-center text-cedea-red">
-            <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900">
+            <h1 class="text-3xl font-black uppercase tracking-tight ">
                 Login Admin
             </h1>
-            <p class="mt-2 text-sm font-medium text-gray-500">
+            <p class="mt-2 text-sm font-medium ">
                 Please enter username and password to enter
             </p>
         </div>
