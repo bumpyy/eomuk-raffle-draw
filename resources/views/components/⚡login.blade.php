@@ -25,17 +25,17 @@ new class extends Component
 
         // Handle failure
         $this->errorMessage = 'Invalid username or password.';
-        $this->password = ''; // Clear the password field
+        $this->password = '';
     }
 };
 ?>
 
-<div class="flex min-h-screen items-center justify-center bg-gray-50 font-sans">
+<div class="flex min-h-screen items-center justify-center font-sans">
     <div class="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
 
-        <div class="mb-8 text-center">
+        <div class="mb-8 text-center text-cedea-red">
             <h1 class="text-3xl font-black uppercase tracking-tight text-gray-900">
-                Access
+                Login Admin
             </h1>
             <p class="mt-2 text-sm font-medium text-gray-500">
                 Please enter username and password to enter
@@ -51,7 +51,7 @@ new class extends Component
             @endif
 
             <div>
-                <label class="mb-2 block text-sm font-bold text-gray-700">Username</label>
+                <label class="text-cedea-red mb-2 block text-sm font-bold ">Username</label>
                 <input
                     type="text"
                     wire:model="username"
@@ -62,7 +62,7 @@ new class extends Component
             </div>
 
             <div>
-                <label class="mb-2 block text-sm font-bold text-gray-700">Password</label>
+                <label class="text-cedea-red mb-2 block text-sm font-bold ">Password</label>
                 <input
                     type="password"
                     wire:model="password"
@@ -73,9 +73,9 @@ new class extends Component
 
             <button
                 type="submit"
-                class="w-full rounded-lg bg-blue-600 px-4 py-3 text-lg font-bold text-white shadow-md transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 active:scale-[0.98]"
+                class="w-full rounded-lg bg-cedea-red px-4 py-3 text-lg font-bold text-white shadow-md transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 active:scale-[0.98]"
             >
-                <span wire:loading.remove>Secure Login</span>
+                <span wire:loading.remove>Login</span>
                 <span wire:loading>Verifying...</span>
             </button>
         </form>

@@ -15,7 +15,7 @@
     public array $animationPool = [];
     public WinnerPrizeEnum $prize;
 
-    public string $viewMode = 'table';
+    public string $viewMode = 'grid';
     public bool $scrambleInList;
     public bool $hideTopScramble;
 
