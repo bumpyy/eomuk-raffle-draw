@@ -15,11 +15,10 @@ new class extends Component
         $validPassword = env('ADMIN_PASSWORD', 'password');
 
         if ($this->username === $validUsername && $this->password === $validPassword) {
-            // Set the session gimmick
             session()->put('is_admin_logged_in', true);
 
-            // Redirect to the main raffle page (defaulting to trip)
-            $this->redirectRoute('raffle.show', ['prize' => 'trip'], navigate: true);
+
+            $this->redirectRoute('welcome', navigate: true);
             return;
         }
 
