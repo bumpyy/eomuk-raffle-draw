@@ -35,8 +35,8 @@ enum WinnerPrizeEnum: string
     public function label(): string
     {
         return match ($this) {
-            self::TRIP => 'Grand Trip to Korea',
-            self::MONEY => 'Cash Prize Pool',
+            self::TRIP => 'Trip Ke Korea',
+            self::MONEY => 'Hadiah Uang Tunai',
         };
     }
 }

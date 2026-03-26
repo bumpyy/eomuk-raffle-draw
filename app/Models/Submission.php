@@ -7,6 +7,7 @@ use App\Enum\SubmissionStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -55,6 +56,14 @@ class Submission extends Model implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the winner associated with the Submission
+     */
+    public function winner(): HasOne
+    {
+        return $this->hasOne(Winner::class);
     }
 
     protected static function boot()

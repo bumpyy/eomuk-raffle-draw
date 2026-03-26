@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Raffle Winners - {{ $prizeName }}</title>
+    <title>Raffle Winners - {{ $prizeName ?? 'all' }}</title>
 
     <style>
         body {
@@ -94,7 +94,7 @@
         <p>Jakarta, {{ now()->setTimezone('Asia/Jakarta')->translatedFormat('F j, Y') }}</p>
     </div>
 
-    <table style="margin-bottom: 100px;">
+    <table style="margin-bottom: 350px;">
         <thead>
             <tr>
                 <th>No</th>
@@ -111,9 +111,11 @@
                     <td>{{ $winner['name'] }}</td>
                     <td class="raffle-col">{{ $winner['raffle_number'] }}</td>
                     <td>{{ $winner['phone'] }}</td>
-                    <td>{{ $prizeName }}</td>
+                    <td>{{ $winner['prize']->label() }}</td>
                 </tr>
             @endforeach
+
+
             <div style="display:inline-block; position: absolute; bottom:30px; ">
                 <table class="signature">
                     <tbody>
@@ -151,7 +153,6 @@
             </div>
         </tbody>
     </table>
-
 
 
 </body>

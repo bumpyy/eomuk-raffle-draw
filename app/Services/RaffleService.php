@@ -25,10 +25,12 @@ class RaffleService
     /**
      * Fetch existing winners for a specific prize.
      */
-    public function getExistingWinners(WinnerPrizeEnum $prize): array
+    public function getExistingWinners(?WinnerPrizeEnum $prize = null): array
     {
         return Winner::with(['submission.user'])
-            ->where('prize', $prize->value)
+            ->when($prize !== null, function ($query) use ($prize) {
+                $query->where('prize', $prize->value);
+            })
             ->orderBy('id', 'asc')
             ->get()
             ->map(fn ($winner) => $this->formatWinnerData($winner->submission))
@@ -130,6 +132,7 @@ class RaffleService
             'name' => $submission->user?->name ?? 'Unknown User',
             'email' => $submission->user?->email ?? 'N/A',
             'phone' => $submission->user?->phone ?? 'N/A',
+            'prize' => $submission->winner?->prize ?? 'N/A',
         ];
     }
 }

@@ -9,20 +9,30 @@ use function Spatie\LaravelPdf\Support\pdf;
 
 class DownloadPdfController extends Controller
 {
-    public function __invoke(WinnerPrizeEnum $prize, RaffleService $raffleService)
+    public function __invoke(WinnerPrizeEnum|string $prize, RaffleService $raffleService)
     {
-        $winners = $raffleService->getExistingWinners($prize);
 
-        if (empty($winners)) {
-            return back();
+        if (! ($prize instanceof WinnerPrizeEnum)) {
+            $winners = $raffleService->getExistingWinners();
+
+            if (empty($winners)) {
+                return back();
+            }
+
+            $filename = 'raffle_winners_all_'.now()->format('Ymd_His').'.pdf';
+
+        } else {
+            $winners = $raffleService->getExistingWinners($prize);
+
+            if (empty($winners)) {
+                return back();
+            }
+
+            $filename = "raffle_winners_{$prize->value}_".now()->format('Ymd_His').'.pdf';
         }
-
-        $prizeName = $prize->label();
-        $filename = "raffle_winners_{$prize->value}_".now()->format('Ymd_His').'.pdf';
 
         return pdf('pdf.winners', [
             'winners' => $winners,
-            'prizeName' => $prizeName,
         ])
             ->footerView('pdf.footer-view')
             ->name($filename);

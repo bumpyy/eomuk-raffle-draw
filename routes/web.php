@@ -18,9 +18,10 @@ Route::middleware([StaticAuth::class])->group(function () {
     //     ->name('raffle.index');
 
     Route::livewire('/{prize}', 'pages::raffle')
-        ->whereIn('prize', array_column(WinnerPrizeEnum::cases(), 'value'))
+        ->whereIn('prize', array_merge(['all'], array_column(WinnerPrizeEnum::cases(), 'value')))
         ->name('raffle.show');
 });
+
 Route::get('/export-pdf/{prize}', DownloadPdfController::class)->name('export.pdf');
 
 // require __DIR__.'/auth.php';

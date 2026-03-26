@@ -289,8 +289,13 @@
             Export Excel
         </button>
 
-                <a class="bg-cedea-blue inline-flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
+                <!-- <a class="bg-cedea-blue inline-flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
                     href="{{ route('export.pdf', ['prize' => $prize->value]) }}" target="_blank">
+                    Export PDF
+                </a> -->
+
+                <a class="bg-cedea-blue inline-flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-bold text-white transition-colors"
+                    href="{{ route('export.pdf', ['prize' => 'all']) }}" target="_blank">
                     Export PDF
                 </a>
 
