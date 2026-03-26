@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enum\WinnerPrizeEnum;
 use App\Services\RaffleService;
-use Spatie\LaravelPdf\Facades\Pdf as FacadesPdf;
+
+use function Spatie\LaravelPdf\Support\pdf;
 
 class DownloadPdfController extends Controller
 {
@@ -19,10 +20,11 @@ class DownloadPdfController extends Controller
         $prizeName = $prize->label();
         $filename = "raffle_winners_{$prize->value}_".now()->format('Ymd_His').'.pdf';
 
-        return FacadesPdf::view('pdf.winners', [
+        return pdf('pdf.winners', [
             'winners' => $winners,
             'prizeName' => $prizeName,
         ])
+            ->footerView('pdf.footer-view')
             ->name($filename);
 
     }

@@ -1,4 +1,0 @@
-@props(['submission'])
-<div>
-
-</div>

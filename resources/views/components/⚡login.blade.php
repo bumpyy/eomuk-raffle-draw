@@ -10,7 +10,6 @@ new class extends Component
 
     public function authenticate(): void
     {
-        // Fetch credentials directly from .env (fallback to 'admin'/'password' if not set)
         $validUsername = env('ADMIN_USERNAME', 'admin');
         $validPassword = env('ADMIN_PASSWORD', 'password');
 
@@ -22,7 +21,6 @@ new class extends Component
             return;
         }
 
-        // Handle failure
         $this->errorMessage = 'Invalid username or password.';
         $this->password = '';
     }
@@ -36,6 +34,7 @@ new class extends Component
             <h1 class="text-3xl font-black uppercase tracking-tight ">
                 Login Admin
             </h1>
+
             <p class="mt-2 text-sm font-medium ">
                 Please enter username and password to enter
             </p>

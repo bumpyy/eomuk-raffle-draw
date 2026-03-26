@@ -266,6 +266,7 @@
         @endif
     </div>
 
+@if(count($this->winnersPaginated))
     <div class="w-full max-w-7xl px-6">
         <div class="mb-6 flex items-center justify-between border-b-2 border-gray-200 pb-4">
             <div class="flex items-center space-x-2 rounded-lg bg-gray-200 p-1">
@@ -313,4 +314,6 @@
             {{ $this->winnersPaginated->links() }}
         </div>
     </div>
+@endif
+
 </div>

@@ -1,12 +1,12 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <title>Raffle Winners - {{ $prizeName }}</title>
+
     <style>
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: Arial, sans-serif;
             color: #333;
             margin: 0;
             padding: 20px;
@@ -34,14 +34,20 @@
 
         .prize-name {
             color: #2563eb;
-            /* Tailwind Blue-600 */
             font-weight: bold;
         }
 
         table {
             width: 100%;
+            font-family: Arial, sans-serif;
             border-collapse: collapse;
             font-size: 13px;
+        }
+
+        table,
+        td,
+        th {
+            font-family: Arial, sans-serif;
         }
 
         th,
@@ -65,7 +71,6 @@
         }
 
         .raffle-col {
-            font-family: monospace;
             font-weight: bold;
             width: 25%;
         }
@@ -74,39 +79,80 @@
         tr {
             page-break-inside: avoid;
         }
+
+        .signature {
+            border-collapse: collapse;
+        }
     </style>
 </head>
 
-<body>
+<body style="position: relative;">
 
     <div class="header">
-        <h1>Official Cedea Eomuk Prize Results</h1>
-        <p>Prize: <span class="prize-name">{{ $prizeName }}</span></p>
-        <p>Generated on {{ now()->format('F j, Y \a\t g:i A') }}</p>
+        <h1>Daftar Pemenang “EOMUK CHILL IN SEOUL”</h1>
+        <p>PT Citradimensi Arthali</p>
+        <p>Jakarta, {{ now()->setTimezone('Asia/Jakarta')->translatedFormat('F j, Y') }}</p>
     </div>
 
-    <table>
+    <table style="margin-bottom: 100px;">
         <thead>
             <tr>
                 <th>No</th>
-                <th>Raffle Number</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th>Nama</th>
+                <th>Kode unik</th>
+                <th>No. Handphone</th>
+                <th>Jenis Hadiah</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($winners as $index => $winner)
                 <tr>
                     <td class="no-col">{{ $index + 1 }}</td>
-                    <td class="raffle-col">{{ $winner['raffle_number'] }}</td>
                     <td>{{ $winner['name'] }}</td>
-                    <td>{{ $winner['email'] }}</td>
+                    <td class="raffle-col">{{ $winner['raffle_number'] }}</td>
                     <td>{{ $winner['phone'] }}</td>
+                    <td>{{ $prizeName }}</td>
                 </tr>
             @endforeach
+            <div style="display:inline-block; position: absolute; bottom:30px; ">
+                <table class="signature">
+                    <tbody>
+                        @php
+                            $signatures = [
+                                'Kementerian sosial RI',
+                                'Kementerian sosial RI',
+                                'dinas sosial provinsi dki jakarta',
+                                'dinas sosial provinsi dki jakarta',
+                                'notaris',
+                                'agency',
+                                'penyelenggara',
+                                'penyelenggara',
+                            ];
+
+                            $chunkedSignatures = array_chunk($signatures, 4);
+                        @endphp
+
+                        @foreach ($chunkedSignatures as $row)
+                            <tr>
+                                @foreach ($row as $signature)
+                                    <td style="border: 1px solid black; padding: 0; text-align: center;">
+                                        <div
+                                            style="border-bottom: 1px solid black; padding: 10px 20px; font-weight: 900; text-transform: uppercase; height: 50px; text-align: center; vertical-align:middle;">
+                                            {{ $signature }}
+                                        </div>
+                                        <div style="height: 100px;">
+                                        </div>
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </tbody>
     </table>
+
+
 
 </body>
 
