@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +17,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, InteractsWithMedia, Notifiable;
 
     /**
@@ -75,6 +76,28 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
                 'phone_formatted' => formatPhoneNumber($value),
             ],
         );
+    }
+
+    /**
+     * Get the masked email attribute.
+     */
+    public function getMaskedEmailAttribute(): string
+    {
+        $email = $this->email;
+
+        $em = explode('@', $email);
+        $name = implode('@', array_slice($em, 0, count($em) - 1));
+        $len = floor(strlen($name) / 2);
+
+        // Mask first half of username, keep second half
+        return substr($name, 0, $len).str_repeat('*', $len).'@'.end($em);
+    }
+
+    public function getMaskedPhoneAttribute(): string
+    {
+        $num = $this->phone;
+
+        return substr($num, 0, 4).str_repeat('*', (strlen($num) - 4));
     }
 
     /**

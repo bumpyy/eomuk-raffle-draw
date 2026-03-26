@@ -20,7 +20,7 @@
                 </td>
                 <td class="px-6 py-4 font-mono font-black">{{ $winner->submission->raffle_number }}</td>
                 <td class="px-6 py-4 font-semibold">{{ $winner->submission->user->name }}</td>
-                <td class="px-6 py-4 text-sm text-gray-500">{{ $winner->submission->user->email }}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">{{ $winner->submission->user->maskedEmail }}</td>
             </tr>
         @endforeach
 
