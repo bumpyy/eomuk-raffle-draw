@@ -74,6 +74,10 @@ class RaffleService
         $winningSubmissions = Submission::query()
             ->with('user')
             ->where('status', SubmissionStatusEnum::ACCEPTED)
+            ->where(function ($query) {
+                $query->whereNotNull('store_area')
+                    ->orWhere('store_area', '!=', '');
+            })
             ->whereNotNull('raffle_number')
             ->whereHas('user', function ($query) {
                 $query->where('disqualified', false);
