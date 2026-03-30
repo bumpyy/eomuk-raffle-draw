@@ -97,10 +97,14 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     {
         $num = $this->phone;
 
-        $lastThreeDigits = substr($num, -3);
-        $firstThreeDigits = substr($num, 0, 3);
+        $length = strlen($num);
+        $middlePartLength = (int) floor($length / 2);
 
-        return $firstThreeDigits.str_repeat('*', 3).$lastThreeDigits;
+        $firstPart = substr($num, 0, $middlePartLength);
+        $middlePart = str_repeat('*', 3);
+        $lastPart = substr($num, $middlePartLength + 3);
+
+        return $firstPart.$middlePart.$lastPart;
     }
 
     /**
