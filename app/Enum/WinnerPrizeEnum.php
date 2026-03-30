@@ -36,7 +36,7 @@ enum WinnerPrizeEnum: string
     {
         return match ($this) {
             self::TRIP => 'Trip Ke Korea',
-            self::MONEY => 'Hadiah Uang Tunai',
+            self::MONEY => 'Uang Tunai',
         };
     }
 }

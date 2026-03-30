@@ -22,6 +22,7 @@ Route::middleware([StaticAuth::class])->group(function () {
         ->name('raffle.show');
 });
 
-Route::get('/export-pdf/{prize}', DownloadPdfController::class)->name('export.pdf');
+Route::get('/export-pdf-preview/{prize}', [DownloadPdfController::class, 'preview'])->name('export.preview');
+Route::get('/export-pdf/{prize}', [DownloadPdfController::class, 'render'])->name('export.pdf');
 
 // require __DIR__.'/auth.php';
