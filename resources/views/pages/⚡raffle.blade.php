@@ -77,7 +77,6 @@ new class extends Component {
     {
         $winnersExport = $this->getService()->getExistingWinners();
 
-
         if (empty($winnersExport)) {
             return;
         }
@@ -258,6 +257,7 @@ new class extends Component {
                 x-show="!isStreaming" @click="startAnimation">
                 Draw {{ $prize->batchSize() }} Raffle
             </button>
+
             <button class="rounded-xl bg-red-600 px-10 py-4 text-lg font-bold text-white shadow-md hover:-translate-y-1"
                 x-cloak x-show="isStreaming" @click="stopAnimation">
                 Stop & Reveal
