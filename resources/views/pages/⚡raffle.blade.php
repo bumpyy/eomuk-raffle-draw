@@ -259,7 +259,7 @@ new class extends Component
         </div>
     </template>
 
-    <div class="max-w-150 mb-20">
+    <div class="max-w-100 mb-20">
         <img src="{{ $prizeHeaderImage }}" alt="">
     </div>
 
