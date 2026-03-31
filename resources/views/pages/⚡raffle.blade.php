@@ -276,7 +276,7 @@ new class extends Component
                 Stop & Reveal
             </button>
             @else
-            <div class="text-2xl font-black uppercase text-green-500 drop-shadow-sm">Draw Finished!</div>
+            <div class="text-2xl font-black uppercase text-white drop-shadow-sm">SELAMAT PADA PARA PEMENANG</div>
             @endif
     </div>
 
