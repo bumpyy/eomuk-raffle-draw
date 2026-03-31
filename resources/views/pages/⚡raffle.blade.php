@@ -7,18 +7,21 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\LaravelPdf\Facades\Pdf;
 
-new class extends Component {
+new class extends Component
+{
     use WithPagination;
 
-    public array $winners = [];
+    public array $winners       = [];
     public array $animationPool = [];
     public WinnerPrizeEnum $prize;
+    public string $prizeHeaderImage;
 
     public string $viewMode = 'grid';
     public bool $scrambleInList;
     public bool $hideTopScramble;
 
-    private function getService(): RaffleService
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /*******  2c64cd4d-afc4-4e26-977e-3ab3c843f767  *******/ private function getService(): RaffleService
     {
         return app(RaffleService::class);
     }
@@ -28,8 +31,14 @@ new class extends Component {
         $this->winners = $this->getService()->getExistingWinners($this->prize);
         $this->refreshAnimationPool();
 
-        $this->scrambleInList = env('RAFFLE_SCRAMBLE_IN_LIST', true);
+        $this->scrambleInList  = env('RAFFLE_SCRAMBLE_IN_LIST', true);
         $this->hideTopScramble = env('RAFFLE_HIDE_TOP_SCRAMBLE', false);
+
+        if ($this->prize == WinnerPrizeEnum::MONEY) {
+            $this->prizeHeaderImage = asset('img/money-prize.png');
+        } else {
+            $this->prizeHeaderImage = asset('img/plane-prize.png');
+        }
     }
 
     #[Computed]
@@ -45,16 +54,16 @@ new class extends Component {
 
     public function pickWinners(): array
     {
-        $target = $this->prize->targetWinners();
-        $batch = $this->prize->batchSize();
+        $target    = $this->prize->targetWinners();
+        $batch     = $this->prize->batchSize();
         $remaining = $target - count($this->winners);
-        $toDraw = min($batch, $remaining);
+        $toDraw    = min($batch, $remaining);
 
         if ($toDraw <= 0) {
             return [];
         }
 
-        $newWinners = $this->getService()->drawWinners($this->prize, $toDraw);
+        $newWinners    = $this->getService()->drawWinners($this->prize, $toDraw);
         $this->winners = $this->getService()->getExistingWinners($this->prize);
 
         $this->gotoPage($this->winnersPaginated()->lastPage());
@@ -82,7 +91,7 @@ new class extends Component {
         }
 
         $prizeName = $this->prize->value;
-        $filename = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
+        $filename  = "raffle_winners_{$prizeName}_" . now()->format('Ymd_His') . '.csv';
 
         return response()->streamDownload(function () use ($winnersExport) {
             $file = fopen('php://output', 'w');
@@ -103,10 +112,10 @@ new class extends Component {
         }
 
         $prizeName = $this->prize->label();
-        $filename = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
+        $filename  = "raffle_winners_{$this->prize->value}_" . now()->format('Ymd_His') . '.pdf';
 
         return Pdf::view('pdf.winners', [
-            'winners' => $this->winners,
+            'winners'   => $this->winners,
             'prizeName' => $prizeName,
         ])
             ->format('a4')
@@ -128,12 +137,12 @@ new class extends Component {
 
             foreach ($winnersExport as $index => $winner) {
                 $writer->addRow([
-                    'No' => $index + 1,
+                    'No'            => $index + 1,
                     'Raffle Number' => $winner['raffle_number'],
-                    'Name' => $winner['name'],
-                    'Email' => $winner['email'],
-                    'Phone' => $winner['phone'],
-                    'Prize' => $winner['prize']->label(),
+                    'Name'          => $winner['name'],
+                    'Email'         => $winner['email'],
+                    'Phone'         => $winner['phone'],
+                    'Prize'         => $winner['prize']->label(),
                 ]);
             }
         }, $filename);
@@ -249,6 +258,10 @@ new class extends Component {
             </div>
         </div>
     </template>
+
+    <div class="max-w-150 mb-20">
+        <img src="{{ $prizeHeaderImage }}" alt="">
+    </div>
 
     <div class="mb-12 flex h-16 flex-col items-center">
         @if (count($winners) < $prize->targetWinners())

@@ -3,9 +3,9 @@
     <div
         class="flex min-h-screen flex-col items-center justify-center p-8 font-['Spline_Sans',sans-serif] leading-relaxed">
 
-        <h1 class="mb-12 text-4xl font-bold text-white">
+        {{-- <h1 class="mb-12 text-4xl font-bold text-white">
             Selamat Datang Admin
-        </h1>
+        </h1> --}}
 
         <div
             class="max-w-800 min-w-200 mx-auto my-[10vh] grid w-fit grid-cols-2 flex-wrap items-start justify-center gap-10">
